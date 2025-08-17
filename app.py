@@ -2,7 +2,6 @@ import gradio as gr
 from diffusers import DiffusionPipeline
 import torch
 import os
-# We don't need the safety_checker import when loading a full pipeline this way
 
 # --- Configuration ---
 MODEL_ID = "roshanVarghese/TextToImageShoe"
@@ -10,15 +9,12 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 
 # --- Load the Pipeline ---
-print(f"Loading full fine-tuned model from {MODEL_ID}...")
+print(f"Loading fine-tuned model from {MODEL_ID}...")
 
-# Load the pipeline and disable the safety checker to fix the error
-# Setting safety_checker to None tells the pipeline to not load that component
+# The pipeline will now load without the safety_checker, as defined by our new model_index.json
 pipe = DiffusionPipeline.from_pretrained(
     MODEL_ID,
     torch_dtype=DTYPE,
-    safety_checker=None,
-    requires_safety_checker=False
 ).to(DEVICE)
 
 print("Model loaded successfully.")
@@ -38,7 +34,7 @@ def generate(prompt, guidance_scale=7.5, num_steps=50):
 demo = gr.Interface(
     fn=generate,
     inputs=[
-        gr.Textbox(label="Prompt", value="a photo of a high-top sneaker, futuristic design"),
+        gr.Textbox(label="Prompt", value="a futuristic running shoe, neon accents"),
         gr.Slider(minimum=1, maximum=20, step=0.5, value=7.5, label="Guidance Scale"),
         gr.Slider(minimum=10, maximum=100, step=1, value=50, label="Inference Steps")
     ],
