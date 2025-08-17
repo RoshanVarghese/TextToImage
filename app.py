@@ -53,4 +53,4 @@ demo = gr.Interface(
 )
 
 # --- Launch the App ---
-demo.launch()
+demo.launch(share=True, debug=True)
