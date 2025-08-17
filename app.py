@@ -11,10 +11,14 @@ DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 # --- Load the Pipeline ---
 print(f"Loading fine-tuned model from {MODEL_ID}...")
 
-# The pipeline will now load without the safety_checker, as defined by our new model_index.json
+# The 'custom_pipeline' argument forces the use of the standard pipeline code,
+# which is a robust way to bypass configuration errors.
 pipe = DiffusionPipeline.from_pretrained(
     MODEL_ID,
+    custom_pipeline="stable-diffusion", # This is the key fix
     torch_dtype=DTYPE,
+    safety_checker=None,
+    requires_safety_checker=False
 ).to(DEVICE)
 
 print("Model loaded successfully.")
