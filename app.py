@@ -2,6 +2,7 @@ import gradio as gr
 from diffusers import DiffusionPipeline
 import torch
 import os
+from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 
 # Configuration 
 MODEL_ID = "roshanVarghese/TextToImageShoe" 
@@ -13,7 +14,9 @@ print(f"Loading full fine-tuned model from {MODEL_ID}...")
 # We no longer need to load a base model and LoRA separately
 pipe = DiffusionPipeline.from_pretrained(
     MODEL_ID,
-    torch_dtype=DTYPE
+    torch_dtype=DTYPE,
+    safety_checker=None,
+    requires_safety_checker=False
 ).to(DEVICE)
 
 print("Model loaded successfully.")
