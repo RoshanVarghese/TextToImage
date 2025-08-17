@@ -1,22 +1,24 @@
 import gradio as gr
-from diffusers import DiffusionPipeline
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 import torch
 import os
-# We don't need the safety_checker import when loading a full pipeline this way
 
 # --- Configuration ---
 MODEL_ID = "roshanVarghese/TextToImageShoe"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 
+# --- Load a new, more stable scheduler from the model's config ---
+scheduler = DPMSolverMultistepScheduler.from_pretrained(MODEL_ID, subfolder="scheduler")
+
 # --- Load the Pipeline ---
 print(f"Loading full fine-tuned model from {MODEL_ID}...")
 
-# Load the pipeline and disable the safety checker to fix the error
-# Setting safety_checker to None tells the pipeline to not load that component
+# Load the entire pipeline from your repository and inject the new scheduler
 pipe = DiffusionPipeline.from_pretrained(
     MODEL_ID,
     torch_dtype=DTYPE,
+    scheduler=scheduler,
 ).to(DEVICE)
 
 print("Model loaded successfully.")
@@ -45,10 +47,10 @@ demo = gr.Interface(
     description="Enter a prompt to generate a unique shoe design using a fully fine-tuned Stable Diffusion model.",
     allow_flagging="never",
     examples=[
-        ["a photo of a running shoe, vibrant colors"],
-        ["a photo of a leather boot, classic style"],
+        ["a photo of a running shoe, vibrant colors", 7.5, 50],
+        ["a photo of a leather boot, classic style", 8.0, 60],
     ]
 )
 
 # --- Launch the App ---
-demo.launch(share=True, debug=True)
+demo.launch()
