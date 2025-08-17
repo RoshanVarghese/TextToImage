@@ -4,25 +4,19 @@ import torch
 import os
 
 # Configuration 
-BASE_MODEL_ID = "runwayml/stable-diffusion-v1-5"
-LORA_MODEL_ID = "roshanVarghese/TextToImageShoe"
+MODEL_ID = "roshanVarghese/TextToImageShoe" 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 
 # Load the Pipeline 
-print("Loading base model...")
+print(f"Loading full fine-tuned model from {MODEL_ID}...")
+# We no longer need to load a base model and LoRA separately
 pipe = DiffusionPipeline.from_pretrained(
-    BASE_MODEL_ID,
-    torch_dtype=torch.float16
+    MODEL_ID,
+    torch_dtype=DTYPE
 ).to(DEVICE)
 
-print(f"Loading LoRA weights from {LORA_MODEL_ID}...")
-try:
-    pipe.load_lora_weights(LORA_MODEL_ID)
-    pipe.fuse_lora() 
-    print("LoRA weights loaded and fused successfully.")
-except Exception as e:
-    print(f"Could not load LoRA weights. Running with base model only. Error: {e}")
-
+print("Model loaded successfully.")
 pipe.unet.eval()
 
 # Define the Generation Function 
@@ -45,7 +39,7 @@ demo = gr.Interface(
     ],
     outputs=gr.Image(type="pil"),
     title="Generative AI Shoe Generator",
-    description="Enter a prompt to generate a unique shoe design using a Stable Diffusion model fine-tuned with LoRA on the Zappos dataset.",
+    description="Enter a prompt to generate a unique shoe design using a fully fine-tuned Stable Diffusion model.",
     allow_flagging="never",
     examples=[
         ["a photo of a running shoe, vibrant colors"],
@@ -54,5 +48,5 @@ demo = gr.Interface(
     ]
 )
 
-# Launching the App 
+# Launch the App 
 demo.launch()
